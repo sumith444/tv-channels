@@ -53,8 +53,8 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
-            padding: 12px 12px 20px;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            padding: 16px;
             opacity: 0;
             transition: opacity 0.3s ease;
             pointer-events: none;
@@ -70,65 +70,85 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            flex-wrap: wrap;
-            justify-content: center;
+            width: 100%;
         }
 
         .btn {
             background: rgba(20, 25, 35, 0.8);
             border: none;
             color: white;
-            font-size: 18px;
-            width: 40px;
-            height: 40px;
-            border-radius: 40px;
+            font-size: 16px;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             backdrop-filter: blur(6px);
             transition: 0.2s;
+            flex-shrink: 0;
         }
 
         .btn:active { transform: scale(0.94); background: #0084ff; }
 
         .progress-container {
-            flex: 2;
-            min-width: 100px;
+            flex: 1;
             display: flex;
             align-items: center;
-            gap: 8px;
         }
 
-        #progress-bar {
-            flex: 1;
+        #progressBar {
+            width: 100%;
             height: 4px;
             -webkit-appearance: none;
             background: rgba(255,255,255,0.3);
             border-radius: 4px;
+            cursor: pointer;
+            outline: none;
         }
 
-        #progress-bar::-webkit-slider-thumb {
+        #progressBar::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 14px;
-            height: 14px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
             background: #0084ff;
             cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        #progressBar:hover::-webkit-slider-thumb {
+            transform: scale(1.2);
         }
 
         .volume-panel {
             display: flex;
             align-items: center;
-            gap: 6px;
-            background: rgba(0,0,0,0.5);
-            padding: 4px 12px;
+            gap: 8px;
+            background: rgba(20, 25, 35, 0.8);
+            padding-right: 12px;
             border-radius: 30px;
+            backdrop-filter: blur(6px);
+            flex-shrink: 0;
         }
 
-        #volume-slider {
-            width: 70px;
+        #volumeSlider {
+            width: 65px;
             height: 3px;
+            -webkit-appearance: none;
+            background: rgba(255,255,255,0.3);
+            outline: none;
+            border-radius: 2px;
+        }
+
+        #volumeSlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
         }
 
         /* SIDEBAR (channel list) */
@@ -228,8 +248,8 @@
         /* floating menus */
         .floating-menu {
             position: absolute;
-            bottom: 80px;
-            right: 15px;
+            bottom: 70px;
+            right: 16px;
             background: #1e252fcc;
             backdrop-filter: blur(16px);
             border-radius: 18px;
@@ -272,6 +292,7 @@
         }
 
         .error-toast { background: #ff3b30cc; pointer-events: auto; cursor: pointer; display: none; }
+        
         .center-play-big {
             position: absolute;
             top: 50%;
@@ -293,7 +314,7 @@
         /* Keyboard hint */
         .keyboard-hint {
             position: absolute;
-            bottom: 10px;
+            top: 10px;
             left: 10px;
             font-size: 10px;
             color: rgba(255,255,255,0.4);
@@ -305,11 +326,10 @@
         }
 
         @media (max-width: 700px) {
-            .btn { width: 36px; height: 36px; font-size: 14px; }
-            .volume-panel { padding: 2px 8px; }
-            #volume-slider { width: 55px; }
-            .control-bar { gap: 6px; }
+            #volumeSlider { display: none; }
+            .volume-panel { padding-right: 0; }
             .keyboard-hint { display: none; }
+            .control-bar { gap: 8px; }
         }
     </style>
 </head>
@@ -321,13 +341,16 @@
         <div class="controls-overlay" id="controlsOverlay">
             <div class="control-bar">
                 <button class="btn" id="playPauseBtn"><i id="playIcon" class="fas fa-play"></i></button>
+                
                 <div class="volume-panel">
-                    <button class="btn" id="muteBtn" style="width:36px;"><i id="muteIcon" class="fas fa-volume-up"></i></button>
+                    <button class="btn" id="muteBtn"><i id="muteIcon" class="fas fa-volume-up"></i></button>
                     <input type="range" id="volumeSlider" min="0" max="1" step="0.02" value="1">
                 </div>
+                
                 <div class="progress-container">
                     <input type="range" id="progressBar" value="0" step="0.1">
                 </div>
+                
                 <button class="btn" id="speedBtn"><i class="fas fa-tachometer-alt"></i></button>
                 <button class="btn" id="qualityBtn"><i class="fas fa-sliders-h"></i></button>
                 <button class="btn" id="fullscreenBtn"><i class="fas fa-expand"></i></button>
@@ -352,10 +375,9 @@
 </div>
 
 <script>
-    // ======================== COMPLETE CHANNEL DATABASE (ALL 200+ LINKS) ========================
+    // ======================== UPDATE CHANNEL DATABASE (EXCLUDED RELIGIOUS) ========================
     const CHANNELS_DATA = [
         // Sports (12)
-        { name: "SHARQ GAME TV", group: "Sports", url: "https://stream.snexus.co/live/SHARQ_GAME_TV/main_stream.m3u8" },
         { name: "T-Sports", group: "Sports", url: "http://27.124.71.27/T-Sports/index.m3u8" },
         { name: "T-Sports (alt)", group: "Sports", url: "http://198.195.239.50:8095/Tsports/tracks-v1a1/mono.m3u8" },
         { name: "T Sports Live 1", group: "Sports", url: "https://live.tsports.com/mobile_hls/tsports_live_1/playlist.m3u8" },
@@ -436,22 +458,6 @@
         { name: "Amar Digital", group: "Music & Movies", url: "https://live-stream.utkalbongo.com/utkalbongo/stream2/hls/amarbanglatwolivestream.m3u8" },
         { name: "BONGO DRAMAS", group: "Music & Movies", url: "https://admin.himel-op.top/Join-Telegram-@HimelOP_Official/bongo-op.m3u8?id=bongo-dramas" },
         { name: "Duronto TV", group: "Music & Movies", url: "https://tvsen4.aynaott.com/durontotv/index.m3u8" },
-        
-        // Religious (all)
-        { name: "Peace TV Bangla", group: "Religious", url: "https://dzkyvlfyge.erbvr.com/PeaceTvBangla/tracks-v2a1/mono.m3u8" },
-        { name: "Peace TV English", group: "Religious", url: "https://dzkyvlfyge.erbvr.com/PeaceTvEnglish/index.m3u8" },
-        { name: "Peace TV Urdu", group: "Religious", url: "https://dzkyvlfyge.erbvr.com/PeaceTvUrdu/index.m3u8" },
-        { name: "RTV Islam", group: "Religious", url: "https://tvsen6.aynascope.net/rtvislam/index.m3u8?e=1762417832&u=5448cf91-5746-4e78-a357-d45dca5c1ab9&token=9aeaf35d6650b5eab457a136bd251921" },
-        { name: "ATN Islamic", group: "Religious", url: "https://app.ncare.live/c3VydmVyX8RpbEU9Mi8xNy8yMDE0GIDU6RgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcGVMZEJCTEFWeVN3PTOmdFsaWRtaW51aiPhnPTI2/atnislamictv.stream/playlist.m3u8" },
-        { name: "Islamic TV", group: "Religious", url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1724/output/1724.m3u8" },
-        { name: "Islam bangla", group: "Religious", url: "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDDEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFsaWRtaW51aiPhnPTI2/islamchbangla.stream/tracks-v1a1/mono.m3u8" },
-        { name: "Madani TV", group: "Religious", url: "https://streaming.madanichannel.tv/static/streaming-playlists/hls/d3e49b76-ac06-4689-a641-9200445b647f/master.m3u8" },
-        { name: "Makkah TV", group: "Religious", url: "https://app.ncare.live/c3VydmVyX8RpbEU9Mi8xNy8yMDE0GIDU6RgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcGVMZEJCTEFWeVN3PTOmdFsaWRtaW51aiPhnPTI2/makkahtv.stream/playlist.m3u8" },
-        { name: "AL Sunnah TV", group: "Religious", url: "http://m.live.net.sa:1935/live/sunnah/playlist.m3u8" },
-        { name: "EWTN TV", group: "Religious", url: "https://cdn3.wowza.com/1/ZVBYYXFLLzE0c3NC/Qk1FMURC/hls/qrpsvkxl/720/chunklist.m3u8" },
-        { name: "God TV", group: "Religious", url: "https://hlsb-us.god.tv/GODTV/USA-480.m3u8" },
-        { name: "Hare Krsna", group: "Religious", url: "https://hktv.harekrsnatv.com/HKTV/HKWebApp/manifest.mpd" },
-        { name: "Arihant TV", group: "Religious", url: "https://aasthaott.akamaized.net/110923/smil:arihant.smil/chunklist_b1928000.m3u8" },
         
         // India - Bengali & Kolkata (full list)
         { name: "Gopal Bhar", group: "India Bengali", url: "https://cloudfrontnet.vercel.app/tplay/playout/209611/master.m3u8" },
@@ -702,52 +708,43 @@
     videoContainer.addEventListener('touchend', (e) => { if (e.target.closest('.btn') || e.target.closest('.floating-menu')) return; const now = Date.now(); if (now - lastTap < 300) { e.preventDefault(); togglePlay(); showControls(); } else showControls(); lastTap = now; });
     videoContainer.addEventListener('click', (e) => { if (e.target.closest('.btn') || e.target.closest('.floating-menu')) return; const now = Date.now(); if (now - lastTap < 300 && lastTap !== 0) togglePlay(); else showControls(); lastTap = now; });
 
-    // ========== KEYBOARD SHORTCUTS (FIXED) ==========
+    // ========== KEYBOARD SHORTCUTS ==========
     document.addEventListener('keydown', (e) => {
-        // Don't trigger if typing in search input
         if (document.activeElement === searchInput) return;
-        
         const key = e.key;
         const code = e.code;
         
-        // Play/Pause: Space or K
         if (key === ' ' || key === 'Space' || code === 'Space' || key === 'k' || key === 'K') {
             e.preventDefault();
             togglePlay();
             showControls();
         }
-        // Volume Up
         else if (key === 'ArrowUp' || code === 'ArrowUp') {
             e.preventDefault();
             setVolume(Math.min(video.volume + 0.1, 1));
             showControls();
         }
-        // Volume Down
         else if (key === 'ArrowDown' || code === 'ArrowDown') {
             e.preventDefault();
             setVolume(Math.max(video.volume - 0.1, 0));
             showControls();
         }
-        // Seek Forward +10s
         else if (key === 'ArrowRight' || code === 'ArrowRight') {
             e.preventDefault();
             video.currentTime = Math.min(video.currentTime + 10, video.duration || Infinity);
             showControls();
         }
-        // Seek Backward -10s
         else if (key === 'ArrowLeft' || code === 'ArrowLeft') {
             e.preventDefault();
             video.currentTime = Math.max(video.currentTime - 10, 0);
             showControls();
         }
-        // Mute: M key
         else if (key === 'm' || key === 'M') {
             e.preventDefault();
             if (video.muted) setVolume(savedVolume || 0.5);
             else { savedVolume = video.volume; setVolume(0); }
             showControls();
         }
-        // Fullscreen: F key
         else if (key === 'f' || key === 'F') {
             e.preventDefault();
             const container = document.getElementById('video-container');
